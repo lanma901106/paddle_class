@@ -7,6 +7,7 @@ import copy
 import paddle
 import paddle.nn as nn
 
+
 class Identity(nn.Layer):
     def __init__(self):
         super().__init__()
@@ -55,7 +56,7 @@ class PatchEmbedding(nn.Layer):
 
         # TODO: add position embeddings
         self.position_embeddings = paddle.create_parameter(
-            shape=[1, n_patches+2, embed_dim],
+            shape=[1, n_patches + 2, embed_dim],
             dtype='float32',
             default_initializer=nn.initializer.TruncatedNormal(std=0.02))
 
@@ -65,9 +66,9 @@ class PatchEmbedding(nn.Layer):
         # TODO: add distill tokens
         distill_tokens = self.cls_token.expand((x.shape[0], -1, -1))
 
-        x = self.patch_embedding(x) # [n, c', h', w']
-        x = x.flatten(2) # [n, c', h'*w']
-        x = x.transpose([0, 2, 1]) # [n, h'*w', c']
+        x = self.patch_embedding(x)  # [n, c', h', w']
+        x = x.flatten(2)  # [n, c', h'*w']
+        x = x.transpose([0, 2, 1])  # [n, h'*w', c']
 
         # TODO: concat tokens
         x = paddle.concat([cls_tokens, distill_tokens, x], axis=1)
@@ -79,6 +80,7 @@ class PatchEmbedding(nn.Layer):
 
 class Attention(nn.Layer):
     """multi-head self attention"""
+
     def __init__(self, embed_dim, num_heads, qkv_bias=True, dropout=0., attention_dropout=0.):
         super().__init__()
         self.num_heads = num_heads
@@ -105,17 +107,17 @@ class Attention(nn.Layer):
     def forward(self, x):
         # x -> [N, num_patches, dim]
         # x -> q, k, v
-        qkv = self.qkv(x).chunk(3, axis=-1) # list of tensors
+        qkv = self.qkv(x).chunk(3, axis=-1)  # list of tensors
         q, k, v = map(self.transpose_multihead, qkv)
 
-        attn = paddle.matmul(q, k, transpose_y=True) # q * k'
+        attn = paddle.matmul(q, k, transpose_y=True)  # q * k'
         attn = attn * self.scales
         attn = self.softmax(attn)
         attn = self.attention_dropout(attn)
 
         out = paddle.matmul(attn, v)
         out = out.transpose([0, 2, 1, 3])
-        out = out.reshape(out.shape[:-2]+[self.all_head_dim])
+        out = out.reshape(out.shape[:-2] + [self.all_head_dim])
 
         out = self.proj(out)
         out = self.dropout(out)
@@ -200,9 +202,8 @@ class DeiT(nn.Layer):
 def main():
     model = DeiT()
     print(model)
-    paddle.summary(model, (4, 3, 224, 224)) # must be tuple
+    paddle.summary(model, (4, 3, 224, 224))  # must be tuple
 
 
 if __name__ == "__main__":
     main()
-

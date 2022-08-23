@@ -1,6 +1,8 @@
 import paddle
 import paddle.nn as nn
 
+paddle.set_device('cpu')
+
 
 class PatchEmbedding(nn.Layer):
     def __init__(self, patch_size=4, embed_dim=96):
@@ -150,7 +152,7 @@ class SwinBlock(nn.Layer):
 def main():
     t = paddle.randn([4, 3, 224, 224])
     patch_embedding = PatchEmbedding(patch_size=4, embed_dim=96)
-    swin_block = SwinBlock(dim=96, input_resolution = [56, 56], num_heads=4, window_size=7)
+    swin_block = SwinBlock(dim=96, input_resolution=[56, 56], num_heads=4, window_size=7)
     patch_merging = PatchMerging(input_resolution=[56, 56], dim=96)
 
     out = patch_embedding(t)  # [4, 56, 56, 96]

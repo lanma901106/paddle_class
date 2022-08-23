@@ -6,6 +6,7 @@
 import copy
 import paddle
 import paddle.nn as nn
+import pdb
 
 
 class Identity(nn.Layer):
@@ -58,11 +59,11 @@ class PatchEmbedding(nn.Layer):
     def forward(self, x):
         # [n, c, h, w]
         class_tokens = self.class_token.expand([x.shape[0], -1, -1]) # for batch
-        x = self.patch_embedding(x)
-        x = x.flatten(2)
-        x = x.transpose([0, 2, 1])
-        x = paddle.concat([class_tokens, x], axis=1)
-        x = x + self.position_embedding
+        x = self.patch_embedding(x)  # [n, embed_dim, h', w']
+        x = x.flatten(2)  # [n, embed_dim, h'*w']
+        x = x.transpose([0, 2, 1])  # [n, num_patches, embed_dim]
+        x = paddle.concat([class_tokens, x], axis=1)  # [n, num_patches+1, embed_dim]
+        x = x + self.position_embedding # [n, num_patches+1, embed_dim]
         return x
 
 
@@ -171,7 +172,7 @@ class VisualTransformer(nn.Layer):
 
     def forward(self, x):
         # x: [N, C, H, W]
-        x = self.patch_embedding(x) # [N, embed_dim, h', w']
+        x = self.patch_embedding(x)  # [N, embed_dim, h', w']
         print(x.shape)
         x = self.encoder(x)
         print(x.shape)
@@ -182,6 +183,12 @@ class VisualTransformer(nn.Layer):
 def main():
     vit = VisualTransformer()
     print(vit)
+    # for key, val in vit.state_dict().items():
+    #     print(key, ': ', val.shape)
+
+    t = paddle.randn([4, 3, 224, 224])
+    out = vit(t)
+    print(out.shape)
     paddle.summary(vit, (4, 3, 224, 224))  # must be tuple
 
 

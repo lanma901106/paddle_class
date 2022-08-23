@@ -33,7 +33,7 @@ class Attention(nn.Layer):
         return x
 
     def forward(self, x):
-        pdb.set_trace()
+        # pdb.set_trace()
         B, N, _ = x.shape
         qkv = self.qkv(x).chunk(3, -1)  # [B, N, all_head_dim] * 3
         q, k, v = map(self.transpose_multi_head, qkv)  # q,k,v:[B, num_heads, num_patches, head_dim]
@@ -42,11 +42,11 @@ class Attention(nn.Layer):
         attn = self.scale * attn
         attn = self.softmax(attn)
         attn_weight = attn
-        # attn: [B, num_heas, num_patches, num_patches]
+        # attn: [B, num_heads, num_patches, num_patches]
 
         out = paddle.matmul(attn, v)  # softmax(scale*(1*k'))*v
         out = out.transpose([0, 2, 1, 3])
-        # attn: [B, num_heas, num_patches, head_dim]
+        # attn: [B, num_heads, num_patches, head_dim]
         out = out.reshape([B, N, -1])
         out = self.proj(out)
         return out, attn_weight
@@ -59,6 +59,8 @@ def main():
     model = Attention(embed_dim=96, num_heads=8,
                       qkv_bias=False, qk_scale=None, dropout=0., attention_dropout=0.)
     print(model)
+    for key, val in model.state_dict().items():
+        print(key, ': ', val.shape)
 
     out, attn_weights = model(t)
     print(out.shape)

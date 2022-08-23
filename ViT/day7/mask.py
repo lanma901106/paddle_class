@@ -2,6 +2,7 @@ import paddle
 from PIL import Image
 paddle.set_device('cpu')
 
+
 def windows_partition(x, window_size):
     """ partite windows into window_size x window_size
     Args:

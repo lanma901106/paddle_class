@@ -1,5 +1,7 @@
 import paddle
 import paddle.nn as nn
+import pdb
+
 paddle.set_device('cpu')
 
 
@@ -73,6 +75,7 @@ class ResNet18(nn.Layer):
         return nn.Sequential(*layer_list)
 
     def forward(self, x):
+        # pdb.set_trace()
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -87,10 +90,13 @@ class ResNet18(nn.Layer):
         return x
 
 
-
 def main():
     model = ResNet18()
-    print(model)
+    pdb.set_trace()
+    print(type(model.state_dict()))
+    for key, val in model.state_dict().items():
+        print(key, ': ', val.shape)
+
     x = paddle.randn([2, 3, 32, 32])
     print(x.shape)
     out = model(x)

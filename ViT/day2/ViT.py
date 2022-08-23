@@ -6,8 +6,10 @@ import paddle
 import paddle.nn as nn
 import numpy as np
 from PIL import Image
+import pdb
 
 paddle.set_device('cpu')
+
 
 class Identity(nn.Layer):
     def __init__(self):
@@ -34,7 +36,6 @@ class Mlp(nn.Layer):
         return x
 
 
-
 class PatchEmbedding(nn.Layer):
     def __init__(self, image_size, patch_size, in_channels, embed_dim, dropout=0.):
         super().__init__()
@@ -48,9 +49,9 @@ class PatchEmbedding(nn.Layer):
 
     def forward(self, x):
         # [n, c, h, w]
-        x = self.patch_embedding(x) # [n, c', h', w']
-        x = x.flatten(2) # [n, c', h'*w']
-        x = x.transpose([0, 2, 1]) # [n, h'*w', c']
+        x = self.patch_embedding(x)  # [n, c', h', w']
+        x = x.flatten(2)  # [n, c', h'*w']
+        x = x.transpose([0, 2, 1])  # [n, h'*w', c']
         x = self.dropout(x)
         return x
 
@@ -95,7 +96,8 @@ class ViT(nn.Layer):
         self.norm = nn.LayerNorm(16)
 
     def forward(self, x):
-        x = self.patch_embed(x) # [n, h*w, c]: 4, 1024, 16
+        # pdb.set_trace()
+        x = self.patch_embed(x)  # [n, h*w, c]: 4, 1024, 16
         for encoder in self.encoders:
             x = encoder(x)
         # avg
@@ -112,6 +114,8 @@ def main():
     print(t.shape)
     model = ViT()
     print(model)
+    for key, val in model.state_dict().items():
+        print(key, ': ', val.shape)
     out = model(t)
     print(out.shape)
     paddle.summary(model, (4, 3, 224, 224))

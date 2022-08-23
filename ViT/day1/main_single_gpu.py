@@ -7,6 +7,7 @@ from utils import AverageMeter
 
 # target: 93%+
 
+
 def train_one_epoch(model, dataloader, criterion, optimizer, epoch, total_epoch, report_freq=20):
     print(f'----- Training Epoch [{epoch}/{total_epoch}]:')
     loss_meter = AverageMeter()
@@ -63,7 +64,7 @@ def validate(model, dataloader, criterion, report_freq=10):
 def main():
     total_epoch = 200
     batch_size = 512
-    #batch_size = 256
+    # batch_size = 256
 
     model = ResNet18()
     train_dataset = get_dataset(mode='train')
@@ -72,7 +73,7 @@ def main():
     val_dataloader = get_dataloader(val_dataset, batch_size, mode='test')
     criterion = nn.CrossEntropyLoss()
     scheduler = paddle.optimizer.lr.CosineAnnealingDecay(0.02, total_epoch)
-    #scheduler = segmentation.optimizer.lr.CosineAnnealingDecay(0.01, total_epoch)
+    # scheduler = segmentation.optimizer.lr.CosineAnnealingDecay(0.01, total_epoch)
     optimizer = paddle.optimizer.Momentum(learning_rate=scheduler,
                                           parameters=model.parameters(),
                                           momentum=0.9,
@@ -84,7 +85,6 @@ def main():
         model.set_state_dict(state_dict)
         validate(model, val_dataloader, criterion)
         return
-
 
     save_freq = 50
     test_freq = 10
@@ -98,6 +98,7 @@ def main():
         if epoch % save_freq == 0 or epoch == total_epoch:
             paddle.save(model.state_dict(), f'./resnet18_ep{epoch}.pdparams')
             paddle.save(optimizer.state_dict(), f'./resnet18_ep{epoch}.pdopts')
+
 
 if __name__ == "__main__":
     main()
